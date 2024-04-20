@@ -16,4 +16,7 @@ This package provides essential scripts (FrustumVisibilityManager and Visibility
 <img width="321" alt="Screenshot 2024-04-20 at 20 07 29" src="https://github.com/safakgulpinar/FrustumVisibilitySystem/assets/90358778/3a6951fc-172a-4adf-8442-356b34c2889a">
 <img width="323" alt="Screenshot 2024-04-20 at 20 11 41" src="https://github.com/safakgulpinar/FrustumVisibilitySystem/assets/90358778/0213042d-ee30-4f39-a783-6ced2c09315f">
 
-![Basic Wobbly TMP Video](https://github.com/safakgulpinar/BasicWobblyTMP/assets/90358778/de294169-49fe-4454-947b-e66c306978d3)
+![Basic Wobbly TMP Video](https://github.com/safakgulpinar/FrustumVisibilitySystem/assets/90358778/0f0eedfd-0409-44f5-abb2-78274abede33)
+
+
+
