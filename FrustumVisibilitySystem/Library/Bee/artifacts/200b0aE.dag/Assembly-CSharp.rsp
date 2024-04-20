@@ -355,6 +355,7 @@
 -r:"Library/Bee/artifacts/200b0aE.dag/UnityEditor.UI.ref.dll"
 -r:"Library/Bee/artifacts/200b0aE.dag/UnityEngine.UI.ref.dll"
 "Assets/_FrustumVisibilitySystem/Scripts/FrustumVisibilityManager.cs"
+"Assets/_FrustumVisibilitySystem/Scripts/Octree.cs"
 "Assets/_FrustumVisibilitySystem/Scripts/Player.cs"
 "Assets/_FrustumVisibilitySystem/Scripts/VisibilitySubject.cs"
 -langversion:9.0

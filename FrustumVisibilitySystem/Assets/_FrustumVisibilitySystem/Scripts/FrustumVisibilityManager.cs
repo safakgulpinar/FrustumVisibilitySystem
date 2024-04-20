@@ -1,96 +1,90 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
+using _FrustumVisibilitySystem.Scripts;
 
-namespace _FrustumVisibilitySystem.Scripts
+public class FrustumVisibilityManager : MonoBehaviour
 {
-    public class FrustumVisibilityManager : MonoBehaviour
+    [SerializeField] private float checkInterval = 1f;
+    [SerializeField] private Vector3 visibilityOffset = Vector3.zero;
+    [SerializeField] private bool playerStopUpdateStop;
+    [SerializeField] private Camera _mainCamera;
+    private float _nextCheckTime = 0f;
+    private Octree rootOctree;
+
+    private enum VisibilityType
     {
-        private enum  VisibilityType
-        {
-            GameObject,
-            Renderer,
-            CastShadows
-        }
-        
-        [SerializeField]private float checkInterval = 1f; // Interval in seconds to check visibility
-        [SerializeField]private Vector3 visibilityOffset = new (0f, 0f, 0f); // Offset to expand or contract the camera's view frustum on x, y, and z
-        [SerializeField]private bool playerStopUpdateStop;
-        [SerializeField]private VisibilityType visibilityTypeToCheck = VisibilityType.GameObject;
-        
-        private Camera _mainCamera;
-        private float _nextCheckTime = 0f;
-        private readonly List<VisibilitySubject> _visibilitySystemObjects = new ();
+        GameObject,
+        Renderer,
+        CastShadows
+    }
 
-        private void Awake()
-        {
-            _mainCamera = Camera.main;
-            _visibilitySystemObjects.AddRange(FindObjectsOfType<VisibilitySubject>());
-        }
+    [SerializeField] private VisibilityType visibilityTypeToCheck = VisibilityType.GameObject;
 
-        private void Start()
+    private void Awake()
+    {
+        _mainCamera = Camera.main;
+        rootOctree = new Octree(new Bounds(Vector3.zero, new Vector3(1000, 1000, 1000)));
+        VisibilitySubject[] allSubjects = FindObjectsOfType<VisibilitySubject>();
+        foreach (var subject in allSubjects)
         {
-            CheckVisibility();
+            rootOctree.Insert(subject);
         }
+    }
 
-        private void Update()
-        {
-            if(!Player.Instance.IsMoving && playerStopUpdateStop) return;
-            if (!(Time.time >= _nextCheckTime)) return;
-            CheckVisibility();
-            _nextCheckTime = Time.time + checkInterval;
-        }
+    private void Update()
+    {
+        if (!Player.Instance.IsMoving && playerStopUpdateStop) return;
+        if (Time.time < _nextCheckTime) return;
 
-        // Check the visibility of the objects
-        private void CheckVisibility()
+        CheckVisibility();
+        _nextCheckTime = Time.time + checkInterval;
+    }
+
+    private void CheckVisibility()
+    {
+        var planes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
+        AdjustPlanes(ref planes, visibilityOffset);
+    
+        // Octree'deki her bir subject için AABB testi yaparak görünürlüğü kontrol et
+        var allSubjects = rootOctree.GetAllSubjects(); // Tüm nesneleri döndüren bir metod varsayıyorum
+        foreach (var subject in allSubjects)
         {
-            foreach (var visibilitySystemObject in _visibilitySystemObjects)
+            bool isVisible = IsObjectVisible(planes, subject);
+            switch (visibilityTypeToCheck)
             {
-                if (visibilityTypeToCheck == VisibilityType.GameObject)
-                {
-                    visibilitySystemObject.gameObject.SetActive(IsObjectVisible(_mainCamera, visibilitySystemObject));
-                }
-
-                if (visibilityTypeToCheck == VisibilityType.Renderer)
-                {
-                    visibilitySystemObject.SetVisibility(IsObjectVisible(_mainCamera, visibilitySystemObject));
-                }
-                
-                if (visibilityTypeToCheck == VisibilityType.CastShadows)
-                {
-                    visibilitySystemObject.SetShadowCasting(IsObjectVisible(_mainCamera, visibilitySystemObject));
-                }
+                case VisibilityType.GameObject:
+                    subject.gameObject.SetActive(isVisible);
+                    break;
+                case VisibilityType.Renderer:
+                    subject.SetVisibility(isVisible);
+                    break;
+                case VisibilityType.CastShadows:
+                    subject.SetShadowCasting(isVisible);
+                    break;
             }
         }
+    }
 
-        // Check if the object is visible
-        private bool IsObjectVisible(Camera camera, VisibilitySubject visibilitySubject)
+    private bool IsObjectVisible(Plane[] planes, VisibilitySubject subject)
+    {
+        if (subject.CachedRenderer == null) return false;
+        return GeometryUtility.TestPlanesAABB(planes, subject.CachedRenderer.bounds);
+    }
+
+
+    private void AdjustPlanes(ref Plane[] planes, Vector3 offset)
+    {
+        for (int i = 0; i < planes.Length; i++)
         {
-            var subjectCachedRenderer = visibilitySubject.CachedRenderer;
-            if (subjectCachedRenderer == null) return false;
+            var normal = planes[i].normal;
+            var distance = planes[i].distance;
 
-            var planes = GeometryUtility.CalculateFrustumPlanes(camera);
-            AdjustPlanes(ref planes, visibilityOffset);
-            return GeometryUtility.TestPlanesAABB(planes, subjectCachedRenderer.bounds);
-        }
+            float adjustedOffset = 0;
+            if (Mathf.Abs(normal.x) > 0.9) adjustedOffset = offset.x;
+            else if (Mathf.Abs(normal.y) > 0.9) adjustedOffset = offset.y;
+            else if (Mathf.Abs(normal.z) > 0.9) adjustedOffset = offset.z;
 
-        // Adjust the planes based on the offset
-        private static void AdjustPlanes(ref Plane[] planes, Vector3 offset)
-        {
-            for (var i = 0; i < planes.Length; i++)
-            {
-                var normal = planes[i].normal;
-                var distance = planes[i].distance;
-
-                // Adjust the plane distance based on the offset
-                // Assuming plane normals are aligned with world axes (which they are not in general):
-                float adjustedOffset = 0;
-                if (Mathf.Abs(normal.x) > 0.9) adjustedOffset = offset.x;
-                else if (Mathf.Abs(normal.y) > 0.9) adjustedOffset = offset.y;
-                else if (Mathf.Abs(normal.z) > 0.9) adjustedOffset = offset.z;
-
-                planes[i] = new Plane(normal, distance - adjustedOffset);
-            }
+            planes[i] = new Plane(normal, distance - adjustedOffset);
         }
     }
 }
