@@ -13308,9 +13308,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9bbf86d2860246e0b0b55ae1177f7c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  checkInterval: 0.5
+  checkInterval: 0.2
   visibilityOffset: {x: 0, y: 0, z: 0}
   playerStopUpdateStop: 1
+  octreeView: 0
   visibilityTypeToCheck: 0
 --- !u!1 &590701210
 GameObject:

@@ -41,7 +41,7 @@ namespace _FrustumVisibilitySystem.Scripts
             var size = _bounds.size / 2;
             var center = _bounds.center;
 
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 var newCenter = center;
                 newCenter.x += ((i & 4) == 0 ? -1 : 1) * size.x / 2;
@@ -91,16 +91,13 @@ namespace _FrustumVisibilitySystem.Scripts
         
         public void DrawAllBounds()
         {
-            Gizmos.color = Color.yellow; // Gizmo rengini belirle
-            Gizmos.DrawWireCube(_bounds.center, _bounds.size); // Düğümün sınırlarını çiz
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireCube(_bounds.center, _bounds.size);
 
-            // Alt düğümler varsa, onların sınırlarını da çiz
-            if (_children[0] != null)
+            if (_children[0] == null) return;
+            foreach (var child in _children)
             {
-                foreach (var child in _children)
-                {
-                    child.DrawAllBounds();
-                }
+                child.DrawAllBounds();
             }
         }
 
