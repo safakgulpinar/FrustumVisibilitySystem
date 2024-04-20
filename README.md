@@ -12,6 +12,8 @@ The Frustum Visibility System is designed to optimize scene performance in Unity
 ## Package Overview
 This package provides essential scripts (FrustumVisibilityManager and VisibilitySubject) that enable the dynamic management of object visibility and shadow casting based on the camera's view frustum. It is designed for easy integration and minimal setup, making it an ideal solution for performance optimization in various Unity projects.This system offers an understandable and straightforward start in performance optimization.
 
+<img width="571" alt="Screenshot 2024-04-20 at 22 06 33" src="https://github.com/safakgulpinar/FrustumVisibilitySystem/assets/90358778/41180a33-1a74-4ffe-ae03-3c20afefd3e2">
+
 ## Performance Comparison
 <img width="321" alt="Screenshot 2024-04-20 at 20 07 29" src="https://github.com/safakgulpinar/FrustumVisibilitySystem/assets/90358778/3a6951fc-172a-4adf-8442-356b34c2889a">
 <img width="323" alt="Screenshot 2024-04-20 at 20 11 41" src="https://github.com/safakgulpinar/FrustumVisibilitySystem/assets/90358778/0213042d-ee30-4f39-a783-6ced2c09315f">
