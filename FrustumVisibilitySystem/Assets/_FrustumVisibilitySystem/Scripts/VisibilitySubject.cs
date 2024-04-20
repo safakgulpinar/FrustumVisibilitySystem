@@ -4,11 +4,11 @@ namespace _FrustumVisibilitySystem.Scripts
 {
     public class VisibilitySubject : MonoBehaviour
     {
-        private Renderer _renderer;
+        public Renderer CachedRenderer { get; private set; }
         
         private void Awake()
         {
-            _renderer = GetComponent<Renderer>();
+            CachedRenderer = GetComponent<Renderer>();
         }
         
         /// <summary>
@@ -17,7 +17,7 @@ namespace _FrustumVisibilitySystem.Scripts
         /// <param name="isVisible"></param>
         public void SetVisibility(bool isVisible)
         {
-            if(_renderer != null) _renderer.enabled = isVisible;
+            if(CachedRenderer != null) CachedRenderer.enabled = isVisible;
         }
         
         /// <summary>
@@ -26,7 +26,7 @@ namespace _FrustumVisibilitySystem.Scripts
         /// /// <param name="isCasting"></param>
         public void SetShadowCasting(bool isCasting)
         {
-            if(_renderer != null) _renderer.shadowCastingMode = isCasting ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
+            if(CachedRenderer != null) CachedRenderer.shadowCastingMode = isCasting ? UnityEngine.Rendering.ShadowCastingMode.On : UnityEngine.Rendering.ShadowCastingMode.Off;
         }
         
         //Or you can use this method to set the visibility of the object

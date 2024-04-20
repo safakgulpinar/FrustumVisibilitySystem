@@ -48,31 +48,30 @@ namespace _FrustumVisibilitySystem.Scripts
             {
                 if (visibilityTypeToCheck == VisibilityType.GameObject)
                 {
-                    visibilitySystemObject.gameObject.SetActive(IsObjectVisible(_mainCamera, visibilitySystemObject.gameObject));
-
+                    visibilitySystemObject.gameObject.SetActive(IsObjectVisible(_mainCamera, visibilitySystemObject));
                 }
 
                 if (visibilityTypeToCheck == VisibilityType.Renderer)
                 {
-                    visibilitySystemObject.SetVisibility(IsObjectVisible(_mainCamera, visibilitySystemObject.gameObject));
+                    visibilitySystemObject.SetVisibility(IsObjectVisible(_mainCamera, visibilitySystemObject));
                 }
                 
                 if (visibilityTypeToCheck == VisibilityType.CastShadows)
                 {
-                    visibilitySystemObject.SetShadowCasting(IsObjectVisible(_mainCamera, visibilitySystemObject.gameObject));
+                    visibilitySystemObject.SetShadowCasting(IsObjectVisible(_mainCamera, visibilitySystemObject));
                 }
             }
         }
 
         // Check if the object is visible
-        private bool IsObjectVisible(Camera camera, GameObject obj)
+        private bool IsObjectVisible(Camera camera, VisibilitySubject visibilitySubject)
         {
-            var renderer = obj.GetComponent<Renderer>();
-            if (renderer == null) return false;
+            var subjectCachedRenderer = visibilitySubject.CachedRenderer;
+            if (subjectCachedRenderer == null) return false;
 
             var planes = GeometryUtility.CalculateFrustumPlanes(camera);
             AdjustPlanes(ref planes, visibilityOffset);
-            return GeometryUtility.TestPlanesAABB(planes, renderer.bounds);
+            return GeometryUtility.TestPlanesAABB(planes, GetComponent<Renderer>().bounds);
         }
 
         // Adjust the planes based on the offset
