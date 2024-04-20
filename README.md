@@ -3,6 +3,7 @@
 ## Purpose
 The Frustum Visibility System is designed to optimize scene performance in Unity by dynamically adjusting the visibility and shadow casting properties of objects based on their presence within the camera's view frustum. This system helps in reducing the rendering load by only processing objects that are within the player's field of view. For a deeper understanding of camera frustums in Unity, refer to the Unity Manual on Camera's View Frustum.
 - https://docs.unity3d.com/Manual/UnderstandingFrustum.html
+- https://github.com/Nition/UnityOctree
 
 ## How to Use
 - **Drag and Drop:** Drag and Drop: To implement the Frustum Visibility System, simply drag and drop the FrustumVisibilityManager script onto any active camera in your scene. Ensure that objects that need visibility management are equipped with the VisibilitySubject script.
