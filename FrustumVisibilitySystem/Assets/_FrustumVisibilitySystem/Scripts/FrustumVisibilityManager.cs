@@ -71,7 +71,7 @@ namespace _FrustumVisibilitySystem.Scripts
 
             var planes = GeometryUtility.CalculateFrustumPlanes(camera);
             AdjustPlanes(ref planes, visibilityOffset);
-            return GeometryUtility.TestPlanesAABB(planes, GetComponent<Renderer>().bounds);
+            return GeometryUtility.TestPlanesAABB(planes, subjectCachedRenderer.bounds);
         }
 
         // Adjust the planes based on the offset
