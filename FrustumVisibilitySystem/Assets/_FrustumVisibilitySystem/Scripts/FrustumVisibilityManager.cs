@@ -94,7 +94,7 @@ namespace _FrustumVisibilitySystem.Scripts
 
         private void OnDrawGizmos()
         {
-            if (octreeView)
+            if (octreeView && _rootOctree != null)
             {
                 _rootOctree.DrawAllBounds();
             }
