@@ -13,16 +13,13 @@ namespace _FrustumVisibilitySystem.Scripts
         [SerializeField] private Vector3 visibilityOffset = Vector3.zero;
         [SerializeField] private bool playerStopUpdateStop;
         [SerializeField] private bool octreeView;
-    
-
-        private enum VisibilityType
+        
+        public enum VisibilityType
         {
             GameObject,
             Renderer,
             CastShadows
         }
-
-        [SerializeField] private VisibilityType visibilityTypeToCheck = VisibilityType.GameObject;
 
         private void Awake()
         {
@@ -49,11 +46,12 @@ namespace _FrustumVisibilitySystem.Scripts
             var planes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
             AdjustPlanes(ref planes, visibilityOffset);
 
+            
             var allSubjects = _rootOctree.GetAllSubjects();
             foreach (var subject in allSubjects)
             {
                 var isVisible = IsObjectVisible(planes, subject);
-                switch (visibilityTypeToCheck)
+                switch (subject.visibilityType)
                 {
                     case VisibilityType.GameObject:
                         subject.gameObject.SetActive(isVisible);

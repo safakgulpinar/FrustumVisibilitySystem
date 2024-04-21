@@ -6,6 +6,7 @@ namespace _FrustumVisibilitySystem.Scripts
     {
         public Renderer CachedRenderer { get; private set; }
         
+        [field: SerializeField] public FrustumVisibilityManager.VisibilityType visibilityType { get; private set; }
         private void Awake()
         {
             CachedRenderer = GetComponent<Renderer>();
