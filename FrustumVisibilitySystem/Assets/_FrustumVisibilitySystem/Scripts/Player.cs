@@ -20,8 +20,7 @@ namespace _FrustumVisibilitySystem.Scripts
             if (Instance == null)                
                 Instance = this;            
             else if (Instance != this)                
-                Destroy(gameObject);                
-            DontDestroyOnLoad(gameObject);            
+                Destroy(gameObject);        
         }
         private void Update()
         {

@@ -6,7 +6,7 @@ namespace _FrustumVisibilitySystem.Scripts
     public class Octree
     {
         private Bounds _bounds;
-        private List<VisibilitySubject> _subjects;
+        private readonly List<VisibilitySubject> _subjects;
         private Octree[] _children;
 
         private const int MaxSubjectsBeforeSubdivide = 10;
@@ -25,7 +25,6 @@ namespace _FrustumVisibilitySystem.Scripts
 
             if (_children != null)
             {
-                // Insert into children if already subdivided
                 InsertIntoChildren(subject);
                 return;
             }
@@ -65,8 +64,7 @@ namespace _FrustumVisibilitySystem.Scripts
                 _children[i] = new Octree(newBounds);
             }
 
-            // Move existing subjects to new children
-            List<VisibilitySubject> oldSubjects = new List<VisibilitySubject>(_subjects);
+            var oldSubjects = new List<VisibilitySubject>(_subjects);
             _subjects.Clear();
             foreach (var subject in oldSubjects)
             {
