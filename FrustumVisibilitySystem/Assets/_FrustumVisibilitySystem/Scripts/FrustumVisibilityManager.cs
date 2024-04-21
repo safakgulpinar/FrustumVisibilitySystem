@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace _FrustumVisibilitySystem.Scripts
@@ -8,12 +10,12 @@ namespace _FrustumVisibilitySystem.Scripts
         private Camera _mainCamera;
         private float _nextCheckTime = 0f;
         private Octree _rootOctree;
-    
+
         [SerializeField] private float checkInterval = 1f;
         [SerializeField] private Vector3 visibilityOffset = Vector3.zero;
         [SerializeField] private bool playerStopUpdateStop;
         [SerializeField] private bool octreeView;
-        
+
         public enum VisibilityType
         {
             GameObject,
@@ -37,15 +39,21 @@ namespace _FrustumVisibilitySystem.Scripts
             if (!Player.Instance.IsMoving && playerStopUpdateStop) return;
             if (Time.time < _nextCheckTime) return;
 
-            CheckVisibility();
+            StartCoroutine(PerformVisibilityCheck());
             _nextCheckTime = Time.time + checkInterval;
         }
 
-        private void CheckVisibility()
+        private IEnumerator PerformVisibilityCheck()
+        {
+            var task = CheckVisibilityAsync();
+            while (!task.IsCompleted)
+                yield return null;
+        }
+
+        private async Task CheckVisibilityAsync()
         {
             var planes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
             AdjustPlanes(ref planes, visibilityOffset);
-
             
             var allSubjects = _rootOctree.GetAllSubjects();
             foreach (var subject in allSubjects)
@@ -70,7 +78,9 @@ namespace _FrustumVisibilitySystem.Scripts
 
         private static bool IsObjectVisible(Plane[] planes, VisibilitySubject subject)
         {
-            return subject.CachedRenderer != null && GeometryUtility.TestPlanesAABB(planes, subject.CachedRenderer.bounds);
+            // Create a bounding sphere from the center and radius
+            var sphere = new BoundingSphere(subject.Center, subject.Radius);
+            return GeometryUtility.TestPlanesAABB(planes, new Bounds(sphere.position, Vector3.one * (sphere.radius * 2)));
         }
 
 
