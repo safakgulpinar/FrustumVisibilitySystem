@@ -18,22 +18,26 @@ namespace _FrustumVisibilitySystem.Scripts
 
         public void Insert(VisibilitySubject subject)
         {
-            if (!_bounds.Contains(subject.transform.position))
-                return;
+            if (!_bounds.Contains(subject.transform.position)) return;
 
-            if (_subjects.Count < 10 && _children[0] == null)
+            if (_children[0] == null)
             {
-                _subjects.Add(subject);
+                if (_subjects.Count < 10)
+                {
+                    _subjects.Add(subject);
+                    return;
+                }
+                Subdivide();
             }
-            else
-            {
-                if (_children[0] == null)
-                    Subdivide();
 
-                foreach (var child in _children)
-                    child.Insert(subject);
+            foreach (var child in _children)
+            {
+                if (!child._bounds.Contains(subject.transform.position)) continue;
+                child.Insert(subject);
+                return;
             }
         }
+
 
         private void Subdivide()
         {
@@ -56,20 +60,28 @@ namespace _FrustumVisibilitySystem.Scripts
         {
             var results = new List<VisibilitySubject>();
             if (!_bounds.Intersects(queryBounds))
+            {
                 return results;
+            }
 
             foreach (var subject in _subjects)
             {
                 if (queryBounds.Contains(subject.transform.position))
+                {
                     results.Add(subject);
+                }
             }
 
+            // Recursively query child nodes if they exist
             if (_children[0] == null) return results;
             foreach (var child in _children)
+            {
                 results.AddRange(child.Query(queryBounds));
+            }
 
             return results;
         }
+
 
         public IEnumerable<VisibilitySubject> GetAllSubjects()
         {

@@ -45,38 +45,43 @@ namespace _FrustumVisibilitySystem.Scripts
 
         private IEnumerator PerformVisibilityCheck()
         {
-            var task = CheckVisibilityAsync();
-            while (!task.IsCompleted)
-                yield return null;
+            yield return CheckVisibilityCoroutine();
         }
 
-        private Task CheckVisibilityAsync()
+        private IEnumerator CheckVisibilityCoroutine()
         {
             var planes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
             AdjustPlanes(ref planes, visibilityOffset);
-            
+
             var allSubjects = _rootOctree.GetAllSubjects();
             foreach (var subject in allSubjects)
             {
                 var isVisible = IsObjectVisible(planes, subject);
-                switch (subject.visibilityType)
-                {
-                    case VisibilityType.GameObject:
-                        subject.gameObject.SetActive(isVisible);
-                        break;
-                    case VisibilityType.Renderer:
-                        subject.SetVisibility(isVisible);
-                        break;
-                    case VisibilityType.CastShadows:
-                        subject.SetShadowCasting(isVisible);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                HandleVisibility(subject, isVisible);
+                // Yield to spread processing over multiple frames if needed
+                if (Time.frameCount % 10 == 0)  // Adjust the modulus for performance tuning
+                    yield return null;
             }
-
-            return Task.CompletedTask;
         }
+        
+        private static void HandleVisibility(VisibilitySubject subject, bool isVisible)
+        {
+            switch (subject.visibilityType)
+            {
+                case VisibilityType.GameObject:
+                    subject.gameObject.SetActive(isVisible);
+                    break;
+                case VisibilityType.Renderer:
+                    subject.SetVisibility(isVisible);
+                    break;
+                case VisibilityType.CastShadows:
+                    subject.SetShadowCasting(isVisible);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(subject.visibilityType), "Unsupported visibility type");
+            }
+        }
+
 
         private static bool IsObjectVisible(Plane[] planes, VisibilitySubject subject)
         {
@@ -86,6 +91,12 @@ namespace _FrustumVisibilitySystem.Scripts
         }
 
 
+        /// <summary>
+        /// Adjusts the planes of the camera frustum according to the specified offset.
+        /// This helps in managing visibility based on camera perspective adjustments.
+        /// </summary>
+        /// <param name="planes">The planes of the camera frustum to adjust.</param>
+        /// <param name="offset">The offset to apply for adjustment.</param>
         private static void AdjustPlanes(ref Plane[] planes, Vector3 offset)
         {
             for (var i = 0; i < planes.Length; i++)
