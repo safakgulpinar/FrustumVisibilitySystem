@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace _FrustumVisibilitySystem.Scripts
@@ -10,6 +9,8 @@ namespace _FrustumVisibilitySystem.Scripts
         private Camera _mainCamera;
         private float _nextCheckTime = 0f;
         private Octree _rootOctree;
+        
+        private const int FrameInterval = 10;
 
         [SerializeField] private float checkInterval = 1f;
         [SerializeField] private Vector3 visibilityOffset = Vector3.zero;
@@ -59,7 +60,7 @@ namespace _FrustumVisibilitySystem.Scripts
                 var isVisible = IsObjectVisible(planes, subject);
                 HandleVisibility(subject, isVisible);
                 // Yield to spread processing over multiple frames if needed
-                if (Time.frameCount % 10 == 0)  // Adjust the modulus for performance tuning
+                if (Time.frameCount % FrameInterval == 0)  // Adjust the modulus for performance tuning
                     yield return null;
             }
         }

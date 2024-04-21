@@ -7,22 +7,25 @@ namespace _FrustumVisibilitySystem.Scripts
     {
         private Bounds _bounds;
         private readonly List<VisibilitySubject> _subjects;
-        private readonly Octree[] _children;
+        private Octree[] _children;
+
+        private const int MaxSubjectsBeforeSubdivide = 10;
+        private const int NumChildren = 8;
 
         public Octree(Bounds boundary)
         {
             _bounds = boundary;
             _subjects = new List<VisibilitySubject>();
-            _children = new Octree[8];
+            _children = null;
         }
 
         public void Insert(VisibilitySubject subject)
         {
             if (!_bounds.Contains(subject.transform.position)) return;
 
-            if (_children[0] == null)
+            if (_children == null)
             {
-                if (_subjects.Count < 10)
+                if (_subjects.Count < MaxSubjectsBeforeSubdivide)
                 {
                     _subjects.Add(subject);
                     return;
@@ -38,14 +41,13 @@ namespace _FrustumVisibilitySystem.Scripts
             }
         }
 
-
         private void Subdivide()
         {
-            // Subdivide the octree into 8 children and initialize them
+            _children = new Octree[NumChildren];
             var size = _bounds.size / 2;
             var center = _bounds.center;
 
-            for (var i = 0; i < 8; i++)
+            for (var i = 0; i < NumChildren; i++)
             {
                 var newCenter = center;
                 newCenter.x += ((i & 4) == 0 ? -1 : 1) * size.x / 2;
@@ -72,8 +74,7 @@ namespace _FrustumVisibilitySystem.Scripts
                 }
             }
 
-            // Recursively query child nodes if they exist
-            if (_children[0] == null) return results;
+            if (_children == null) return results;
             foreach (var child in _children)
             {
                 results.AddRange(child.Query(queryBounds));
@@ -82,7 +83,6 @@ namespace _FrustumVisibilitySystem.Scripts
             return results;
         }
 
-
         public IEnumerable<VisibilitySubject> GetAllSubjects()
         {
             foreach (var subject in _subjects)
@@ -90,8 +90,7 @@ namespace _FrustumVisibilitySystem.Scripts
                 yield return subject;
             }
 
-            // If there are children, get all subjects from them
-            if (_children[0] == null) yield break;
+            if (_children == null) yield break;
             foreach (var child in _children)
             {
                 foreach (var childSubject in child.GetAllSubjects())
@@ -100,18 +99,17 @@ namespace _FrustumVisibilitySystem.Scripts
                 }
             }
         }
-        
+
         public void DrawAllBounds()
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireCube(_bounds.center, _bounds.size);
 
-            if (_children[0] == null) return;
+            if (_children == null) return;
             foreach (var child in _children)
             {
                 child.DrawAllBounds();
             }
         }
-
     }
 }
