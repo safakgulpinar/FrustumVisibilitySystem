@@ -50,7 +50,7 @@ namespace _FrustumVisibilitySystem.Scripts
                 yield return null;
         }
 
-        private async Task CheckVisibilityAsync()
+        private Task CheckVisibilityAsync()
         {
             var planes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
             AdjustPlanes(ref planes, visibilityOffset);
@@ -74,6 +74,8 @@ namespace _FrustumVisibilitySystem.Scripts
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         private static bool IsObjectVisible(Plane[] planes, VisibilitySubject subject)
