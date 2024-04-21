@@ -6,7 +6,7 @@ namespace _FrustumVisibilitySystem.Scripts
     public class Octree
     {
         private Bounds _bounds;
-        private readonly List<VisibilitySubject> _subjects;
+        private List<VisibilitySubject> _subjects;
         private Octree[] _children;
 
         private const int MaxSubjectsBeforeSubdivide = 10;
@@ -23,21 +23,29 @@ namespace _FrustumVisibilitySystem.Scripts
         {
             if (!_bounds.Contains(subject.transform.position)) return;
 
-            if (_children == null)
+            if (_children != null)
             {
-                if (_subjects.Count < MaxSubjectsBeforeSubdivide)
-                {
-                    _subjects.Add(subject);
-                    return;
-                }
-                Subdivide();
+                // Insert into children if already subdivided
+                InsertIntoChildren(subject);
+                return;
             }
 
+            _subjects.Add(subject);
+            if (_subjects.Count >= MaxSubjectsBeforeSubdivide)
+            {
+                Subdivide();
+            }
+        }
+
+        private void InsertIntoChildren(VisibilitySubject subject)
+        {
             foreach (var child in _children)
             {
-                if (!child._bounds.Contains(subject.transform.position)) continue;
-                child.Insert(subject);
-                return;
+                if (child._bounds.Contains(subject.transform.position))
+                {
+                    child.Insert(subject);
+                    return;
+                }
             }
         }
 
@@ -55,6 +63,14 @@ namespace _FrustumVisibilitySystem.Scripts
                 newCenter.z += ((i & 1) == 0 ? -1 : 1) * size.z / 2;
                 var newBounds = new Bounds(newCenter, size);
                 _children[i] = new Octree(newBounds);
+            }
+
+            // Move existing subjects to new children
+            List<VisibilitySubject> oldSubjects = new List<VisibilitySubject>(_subjects);
+            _subjects.Clear();
+            foreach (var subject in oldSubjects)
+            {
+                InsertIntoChildren(subject);
             }
         }
 

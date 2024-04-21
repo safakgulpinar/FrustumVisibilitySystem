@@ -67,7 +67,7 @@ namespace _FrustumVisibilitySystem.Scripts
         
         private static void HandleVisibility(VisibilitySubject subject, bool isVisible)
         {
-            switch (subject.visibilityType)
+            switch (subject.VisibilityType)
             {
                 case VisibilityType.GameObject:
                     subject.gameObject.SetActive(isVisible);
@@ -79,7 +79,7 @@ namespace _FrustumVisibilitySystem.Scripts
                     subject.SetShadowCasting(isVisible);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(subject.visibilityType), "Unsupported visibility type");
+                    throw new ArgumentOutOfRangeException(nameof(subject.VisibilityType), "Unsupported visibility type");
             }
         }
 
