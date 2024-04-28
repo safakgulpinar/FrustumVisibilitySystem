@@ -9,8 +9,10 @@ namespace _FrustumVisibilitySystem.Scripts
         private Camera _mainCamera;
         private float _nextCheckTime = 0f;
         private Octree _rootOctree;
+        private bool _systemActive = true;
         
         private const int FrameInterval = 10;
+        private IEnumerator _performVisibilityCheckCoroutine;
 
         [SerializeField] private float checkInterval = 1f;
         [SerializeField] private Vector3 visibilityOffset = Vector3.zero;
@@ -33,14 +35,30 @@ namespace _FrustumVisibilitySystem.Scripts
             {
                 _rootOctree.Insert(subject);
             }
+            
+            _performVisibilityCheckCoroutine = PerformVisibilityCheck();
         }
 
         private void Update()
         {
-            if (!Player.Instance.IsMoving && playerStopUpdateStop) return;
-            if (Time.time < _nextCheckTime) return;
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                SetSystemActive(true);
+            }
+            if(Input.GetKeyDown(KeyCode.P))
+            {
+                SetSystemActive(false);
+            }
+            
+            if (!Player.Instance.IsMoving && playerStopUpdateStop || !_systemActive || Time.time < _nextCheckTime) return;
 
-            StartCoroutine(PerformVisibilityCheck());
+            if (_performVisibilityCheckCoroutine != null)
+            {
+                StopCoroutine(_performVisibilityCheckCoroutine);
+                _performVisibilityCheckCoroutine = null;
+            }
+            StartCoroutine(_performVisibilityCheckCoroutine = PerformVisibilityCheck());
+            
             _nextCheckTime = Time.time + checkInterval;
         }
 
@@ -49,6 +67,10 @@ namespace _FrustumVisibilitySystem.Scripts
             yield return CheckVisibilityCoroutine();
         }
 
+        /// <summary>
+        ///  Check the visibility of all subjects in the octree.
+        /// </summary>
+        /// <returns></returns>
         private IEnumerator CheckVisibilityCoroutine()
         {
             var planes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
@@ -59,12 +81,19 @@ namespace _FrustumVisibilitySystem.Scripts
             {
                 var isVisible = IsObjectVisible(planes, subject);
                 HandleVisibility(subject, isVisible);
-                // Yield to spread processing over multiple frames if needed
-                if (Time.frameCount % FrameInterval == 0)  // Adjust the modulus for performance tuning
+                
+                if (Time.frameCount % FrameInterval == 0)
                     yield return null;
             }
         }
         
+        
+        /// <summary>
+        /// Handles the visibility of the subject based on the visibility type.
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="isVisible"></param>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         private static void HandleVisibility(VisibilitySubject subject, bool isVisible)
         {
             switch (subject.VisibilityType)
@@ -114,6 +143,31 @@ namespace _FrustumVisibilitySystem.Scripts
             }
         }
 
+        /// <summary>
+        ///  Set the system active or inactive.
+        /// </summary>
+        /// <param name="systemActive"></param>
+        public void SetSystemActive(bool systemActive)
+        {
+            _systemActive = systemActive;
+            
+            if (_systemActive)
+            {
+                StartCoroutine(_performVisibilityCheckCoroutine);
+            }
+            else
+            {
+                var allSubjects = _rootOctree.GetAllSubjects();
+                foreach (var subject in allSubjects)
+                {
+                    HandleVisibility(subject, true);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Draw the octree bounds in the scene view.
+        /// </summary>
         private void OnDrawGizmos()
         {
             if (octreeView && _rootOctree != null)

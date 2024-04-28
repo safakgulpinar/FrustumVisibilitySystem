@@ -66,35 +66,11 @@ namespace _FrustumVisibilitySystem.Scripts
 
             var oldSubjects = new List<VisibilitySubject>(_subjects);
             _subjects.Clear();
+            
             foreach (var subject in oldSubjects)
             {
                 InsertIntoChildren(subject);
             }
-        }
-
-        public List<VisibilitySubject> Query(Bounds queryBounds)
-        {
-            var results = new List<VisibilitySubject>();
-            if (!_bounds.Intersects(queryBounds))
-            {
-                return results;
-            }
-
-            foreach (var subject in _subjects)
-            {
-                if (queryBounds.Contains(subject.transform.position))
-                {
-                    results.Add(subject);
-                }
-            }
-
-            if (_children == null) return results;
-            foreach (var child in _children)
-            {
-                results.AddRange(child.Query(queryBounds));
-            }
-
-            return results;
         }
 
         public IEnumerable<VisibilitySubject> GetAllSubjects()
