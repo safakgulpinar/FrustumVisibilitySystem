@@ -41,15 +41,6 @@ namespace _FrustumVisibilitySystem.Scripts
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.O))
-            {
-                SetSystemActive(true);
-            }
-            if(Input.GetKeyDown(KeyCode.P))
-            {
-                SetSystemActive(false);
-            }
-            
             if (!Player.Instance.IsMoving && playerStopUpdateStop || !_systemActive || Time.time < _nextCheckTime) return;
 
             if (_performVisibilityCheckCoroutine != null)
